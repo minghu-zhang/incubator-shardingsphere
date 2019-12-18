@@ -46,24 +46,26 @@ import java.util.Set;
  */
 @Getter
 public final class EncryptRuntimeContext extends AbstractRuntimeContext<EncryptRule> {
-    
+
     private static final String COLUMN_NAME = "COLUMN_NAME";
-    
+
     private static final String TYPE_NAME = "TYPE_NAME";
-    
+
     private static final String INDEX_NAME = "INDEX_NAME";
 
     private static final String IS_NULLABLE = "IS_NULLABLE";
 
     private static final String IS_AUTOINCREMENT = "IS_AUTOINCREMENT";
-    
+
+    private static final String BOOLEAN_YES = "YES";
+
     private final TableMetas tableMetas;
-    
+
     public EncryptRuntimeContext(final DataSource dataSource, final EncryptRule encryptRule, final Properties props, final DatabaseType databaseType) throws SQLException {
         super(encryptRule, props, databaseType);
         tableMetas = createEncryptTableMetas(dataSource, encryptRule);
     }
-    
+
     private TableMetas createEncryptTableMetas(final DataSource dataSource, final EncryptRule encryptRule) throws SQLException {
         Map<String, TableMetaData> tables = new LinkedHashMap<>();
         try (Connection connection = dataSource.getConnection()) {
@@ -91,8 +93,8 @@ public final class EncryptRuntimeContext extends AbstractRuntimeContext<EncryptR
                 String columnName = resultSet.getString(COLUMN_NAME);
                 String columnType = resultSet.getString(TYPE_NAME);
                 boolean isPrimaryKey = primaryKeys.contains(columnName);
-                boolean isNotNull = isPrimaryKey || !resultSet.getBoolean(IS_NULLABLE);
-                boolean isAutoIncrement = resultSet.getBoolean(IS_AUTOINCREMENT);
+                boolean isNotNull = isPrimaryKey || !BOOLEAN_YES.equals(resultSet.getString(IS_NULLABLE));
+                boolean isAutoIncrement = BOOLEAN_YES.equals(resultSet.getString(IS_AUTOINCREMENT));
                 Optional<ColumnMetaData> columnMetaData = getColumnMetaData(tableName, columnName, columnType, isPrimaryKey, isNotNull, isAutoIncrement, encryptRule, derivedColumns);
                 if (columnMetaData.isPresent()) {
                     result.add(columnMetaData.get());
