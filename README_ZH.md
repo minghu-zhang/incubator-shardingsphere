@@ -119,8 +119,8 @@ ShardingSphere是多接入端共同组成的生态圈。
 ## 如何构建
 
 ```bash
-./mvn -s "D:\java\maven-3.3.9\conf\settings.xml" clean install -Prelease -Drat.skip=true
-./mvn -s "D:\java\maven-3.6.1\conf\settings.xml" clean deploy -Prelease -Drat.skip=true
+./mvn -s "D:\java\maven-3.3.9\conf\settings.xml" clean install -Prelease -Drat.skip=true -Dmaven.test.skip=true 
+./mvn -s "D:\java\maven-3.6.1\conf\settings.xml" clean deploy -Prelease -Drat.skip=true -Dmaven.test.skip=true 
 ``` 
 
 构建产物：
