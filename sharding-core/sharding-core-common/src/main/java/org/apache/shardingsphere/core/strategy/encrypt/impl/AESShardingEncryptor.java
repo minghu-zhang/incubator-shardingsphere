@@ -42,44 +42,48 @@ import java.util.Properties;
 @Getter
 @Setter
 public final class AESShardingEncryptor implements ShardingEncryptor {
-    
+
     private static final String AES_KEY = "aes.key.value";
-    
+
     private Properties properties = new Properties();
-    
+
     @Override
     public String getType() {
         return "AES";
     }
-    
+
     @Override
     public void init() {
     }
-    
+
     @Override
     @SneakyThrows
     public String encrypt(final Object plaintext) {
         byte[] result = getCipher(Cipher.ENCRYPT_MODE).doFinal(StringUtils.getBytesUtf8(String.valueOf(plaintext)));
         return Base64.encodeBase64String(result);
     }
-    
+
     @Override
     @SneakyThrows
     public Object decrypt(final String ciphertext) {
         if (null == ciphertext) {
             return null;
         }
-        byte[] result = getCipher(Cipher.DECRYPT_MODE).doFinal(Base64.decodeBase64(String.valueOf(ciphertext)));
+        byte[] bytes = Base64.decodeBase64(ciphertext);
+        if (bytes.length == 0) {
+            throw new IllegalArgumentException("Illegal base64 character 3f");
+        }
+        byte[] result = getCipher(Cipher.DECRYPT_MODE).doFinal(bytes);
         return new String(result);
     }
-    
+
     private Cipher getCipher(final int decryptMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         Preconditions.checkArgument(properties.containsKey(AES_KEY), "No available secret key for `%s`.", AESShardingEncryptor.class.getName());
         Cipher result = Cipher.getInstance(getType());
         result.init(decryptMode, new SecretKeySpec(createSecretKey(), getType()));
         return result;
     }
-    
+
     private byte[] createSecretKey() {
         Preconditions.checkArgument(null != properties.get(AES_KEY), String.format("%s can not be null.", AES_KEY));
         return Arrays.copyOf(DigestUtils.sha1(properties.get(AES_KEY).toString()), 16);
