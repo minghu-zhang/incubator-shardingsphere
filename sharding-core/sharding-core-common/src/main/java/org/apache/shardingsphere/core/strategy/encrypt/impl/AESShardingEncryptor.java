@@ -29,6 +29,7 @@ import org.apache.shardingsphere.spi.encrypt.ShardingEncryptor;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -74,7 +75,7 @@ public final class AESShardingEncryptor implements ShardingEncryptor {
             throw new IllegalArgumentException("Illegal base64 character 3f");
         }
         byte[] result = getCipher(Cipher.DECRYPT_MODE).doFinal(bytes);
-        return new String(result);
+        return new String(result, StandardCharsets.UTF_8);
     }
 
     private Cipher getCipher(final int decryptMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
