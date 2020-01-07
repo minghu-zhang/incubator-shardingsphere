@@ -20,6 +20,7 @@ package org.apache.shardingsphere.core.strategy.encrypt.impl;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.shardingsphere.core.util.StringUtil;
 import org.apache.shardingsphere.spi.encrypt.ShardingEncryptor;
 
 import java.util.Properties;
@@ -46,6 +47,9 @@ public final class MD5ShardingEncryptor implements ShardingEncryptor {
     
     @Override
     public String encrypt(final Object plaintext) {
+        if(StringUtil.isNullOrEmpty(plaintext)) {
+            return (String) plaintext;
+        }
         return DigestUtils.md5Hex(String.valueOf(plaintext));
     }
     

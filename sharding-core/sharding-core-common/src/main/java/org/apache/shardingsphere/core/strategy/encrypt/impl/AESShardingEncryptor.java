@@ -25,11 +25,13 @@ import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.shardingsphere.core.util.StringUtil;
 import org.apache.shardingsphere.spi.encrypt.ShardingEncryptor;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -60,6 +62,9 @@ public final class AESShardingEncryptor implements ShardingEncryptor {
     @Override
     @SneakyThrows
     public String encrypt(final Object plaintext) {
+        if(StringUtil.isNullOrEmpty(plaintext)) {
+            return (String) plaintext;
+        }
         byte[] result = getCipher(Cipher.ENCRYPT_MODE).doFinal(StringUtils.getBytesUtf8(String.valueOf(plaintext)));
         return Base64.encodeBase64String(result);
     }
@@ -67,15 +72,15 @@ public final class AESShardingEncryptor implements ShardingEncryptor {
     @Override
     @SneakyThrows
     public Object decrypt(final String ciphertext) {
-        if (null == ciphertext) {
-            return null;
+        if(StringUtil.isNullOrEmpty(ciphertext)) {
+            return ciphertext;
         }
         byte[] bytes = Base64.decodeBase64(ciphertext);
         if (bytes.length == 0) {
             throw new IllegalArgumentException("Illegal base64 character 3f");
         }
         byte[] result = getCipher(Cipher.DECRYPT_MODE).doFinal(bytes);
-        return new String(result, Charsets.UTF_8);
+        return new String(result, StandardCharsets.UTF_8);
     }
 
     private Cipher getCipher(final int decryptMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
