@@ -21,7 +21,6 @@ import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -62,7 +61,7 @@ public final class AESShardingEncryptor implements ShardingEncryptor {
     @Override
     @SneakyThrows
     public String encrypt(final Object plaintext) {
-        if(StringUtil.isNullOrEmpty(plaintext)) {
+        if (StringUtil.isNullOrEmpty(plaintext)) {
             return (String) plaintext;
         }
         byte[] result = getCipher(Cipher.ENCRYPT_MODE).doFinal(StringUtils.getBytesUtf8(String.valueOf(plaintext)));
@@ -72,15 +71,20 @@ public final class AESShardingEncryptor implements ShardingEncryptor {
     @Override
     @SneakyThrows
     public Object decrypt(final String ciphertext) {
-        if(StringUtil.isNullOrEmpty(ciphertext)) {
+        if (StringUtil.isNullOrEmpty(ciphertext)) {
             return ciphertext;
         }
-        byte[] bytes = Base64.decodeBase64(ciphertext);
-        if (bytes.length == 0) {
-            throw new IllegalArgumentException("Illegal base64 character 3f");
+        try {
+            byte[] bytes = Base64.decodeBase64(ciphertext);
+            if (bytes.length == 0) {
+                throw new IllegalArgumentException("Illegal base64 character 3f");
+            }
+
+            byte[] result = getCipher(Cipher.DECRYPT_MODE).doFinal(bytes);
+            return new String(result, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return ciphertext;
         }
-        byte[] result = getCipher(Cipher.DECRYPT_MODE).doFinal(bytes);
-        return new String(result, StandardCharsets.UTF_8);
     }
 
     private Cipher getCipher(final int decryptMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {

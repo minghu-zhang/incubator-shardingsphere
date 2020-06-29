@@ -402,11 +402,7 @@ public final class EncryptResultSet extends AbstractUnsupportedOperationResultSe
 
     private Object decrypt(final int columnIndex, final Object value) throws SQLException {
         Optional<ShardingEncryptor> shardingEncryptor = findEncryptor(columnIndex);
-        try {
-            return queryWithCipherColumn && shardingEncryptor.isPresent() ? shardingEncryptor.get().decrypt(getCiphertext(value)) : value;
-        } catch (Exception e) {
-            return value;
-        }
+        return queryWithCipherColumn && shardingEncryptor.isPresent() ? shardingEncryptor.get().decrypt(getCiphertext(value)) : value;
     }
 
     private Optional<ShardingEncryptor> findEncryptor(final int columnIndex) throws SQLException {
